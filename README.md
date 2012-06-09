@@ -51,14 +51,14 @@ Some example timings for computing a single hash on my laptop:
 </table>
 
 The default value is 8, which is pretty fast (though *much* slower than
-`md5()` or `sha1()`). You might want to pick a higher value, if you have
+`md5()` or `sha1()`). You might want to pick a higher value if you have
 beefy servers. The bigger the better, but balance it against how often
-your app need to validate logins. Allowing your servers to be DOS'd by
-submitted a few hundred login attempts per second would suck.
+your app needs to validate logins. Allowing your servers to be DOS'd by
+submitting a few hundred login attempts per second would suck.
 
 Because the work factor is built into the hash, you can change the value
 you use over time in your application and the code that checks for valid 
-passwords will not need to change.
+passwords will not need to be changed.
 
 
 ## But I already use some other (bad) hashing function!
