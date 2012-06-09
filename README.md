@@ -1,4 +1,4 @@
-# lib_bcrypt - Store passwords less awfully
+# lib_bcrypt (for PHP) - Store passwords less awfully
 
 If you're storing passwords for user accounts, you should
 <a href="http://codahale.com/how-to-safely-store-a-password/">use bcrypt</a>.
@@ -51,7 +51,7 @@ Some example timings for computing a single hash on my laptop:
 </table>
 
 The default value is 8, which is pretty fast (though *much* slower than
-`md5()` or sha1`()`). You might want to pick a higher value, if you have
+`md5()` or `sha1()`). You might want to pick a higher value, if you have
 beefy servers. The bigger the better, but balance it against how often
 your app need to validate logins. Allowing your servers to be DOS'd by
 submitted a few hundred login attempts per second would suck.
@@ -63,7 +63,7 @@ passwords will not need to change.
 
 ## But I already use some other (bad) hashing function!
 
-If you already store your passwords using `md5()`, sha1`()` or something
+If you already store your passwords using `md5()`, `sha1()` or something
 similar, you can't easily generate bcrypt hashes, since you don't have
 the plaintext passwords.
 
