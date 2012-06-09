@@ -1,72 +1,50 @@
 <?php
-#
-# This is a test program for the portable PHP password hashing framework.
-#
-# Written by Solar Designer and placed in the public domain.
-# See PasswordHash.php for more information.
-#
+	require 'PasswordHash.php';
+	require 'testmore.php';
 
-require 'PasswordHash.php';
+	header('Content-type: text/plain');
 
-header('Content-type: text/plain');
+	#
+	# Try some different work functions.
+	#
+	# On my Intel Core i7 1.8GHz windows laptop:
+	#	wf=4	~2 ms
+	#	wf=6	~6 ms
+	#	wf=8	~25 ms
+	#	wf=10	~105 ms
+	#	wf=12	~400 ms
+	#	wf=14	~1700 ms
+	#
+	# Times are *per hash*. Beyond 14 it gets a bit crazy.
+	#
 
-$ok = 0;
+	foreach (array(4, 8, 12) as $work_function){
 
-# Try to use stronger but system-specific hashes, with a possible fallback to
-# the weaker portable hashes.
-$t_hasher = new PasswordHash(8, FALSE);
+		$t_hasher = new PasswordHash($work_function);
 
-$correct = 'test12345';
-$hash = $t_hasher->HashPassword($correct);
+		$correct = 'test12345';
+		$hash = $t_hasher->HashPassword($correct);
 
-print 'Hash: ' . $hash . "\n";
+		diag('Hash: ' . $hash);
 
-$check = $t_hasher->CheckPassword($correct, $hash);
-if ($check) $ok++;
-print "Check correct: '" . $check . "' (should be '1')\n";
+		$t1 = microtime_ms();
+		$check = $t_hasher->CheckPassword($correct, $hash);
+		$t2 = microtime_ms() - $t1;
+		ok($check, "correct hash (wf=$work_function, $t2 ms)");
 
-$wrong = 'test12346';
-$check = $t_hasher->CheckPassword($wrong, $hash);
-if (!$check) $ok++;
-print "Check wrong: '" . $check . "' (should be '0' or '')\n";
 
-unset($t_hasher);
+		$wrong = 'test12346';
+		$t1 = microtime_ms();
+		$check = $t_hasher->CheckPassword($wrong, $hash);
+		$t2 = microtime_ms() - $t1;
+		ok(!$check, "incorrect hash (wf=$work_function, $t2 ms)");
 
-# Force the use of weaker portable hashes.
-$t_hasher = new PasswordHash(8, TRUE);
+		unset($t_hasher);
+	}
 
-$hash = $t_hasher->HashPassword($correct);
 
-print 'Hash: ' . $hash . "\n";
-
-$check = $t_hasher->CheckPassword($correct, $hash);
-if ($check) $ok++;
-print "Check correct: '" . $check . "' (should be '1')\n";
-
-$check = $t_hasher->CheckPassword($wrong, $hash);
-if (!$check) $ok++;
-print "Check wrong: '" . $check . "' (should be '0' or '')\n";
-
-# A correct portable hash for 'test12345'.
-# Please note the use of single quotes to ensure that the dollar signs will
-# be interpreted literally.  Of course, a real application making use of the
-# framework won't store password hashes within a PHP source file anyway.
-# We only do this for testing.
-$hash = '$P$9IQRaTwmfeRo7ud9Fh4E2PdI0S3r.L0';
-
-print 'Hash: ' . $hash . "\n";
-
-$check = $t_hasher->CheckPassword($correct, $hash);
-if ($check) $ok++;
-print "Check correct: '" . $check . "' (should be '1')\n";
-
-$check = $t_hasher->CheckPassword($wrong, $hash);
-if (!$check) $ok++;
-print "Check wrong: '" . $check . "' (should be '0' or '')\n";
-
-if ($ok == 6)
-	print "All tests have PASSED\n";
-else
-	print "Some tests have FAILED\n";
-
+	function microtime_ms(){
+		    list($usec, $sec) = explode(" ", microtime());
+		    return intval(1000 * ((float)$usec + (float)$sec));
+	}
 ?>
