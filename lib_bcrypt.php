@@ -9,16 +9,11 @@
 # There's absolutely no warranty.
 #
 class BCryptHasher {
-	var $iteration_count_log2;
 	var $random_state;
 
-	function BCryptHasher($iteration_count_log2)
+	function BCryptHasher()
 	{
 		if (CRYPT_BLOWFISH != 1) die("lib_bcyrpt requires CRYPT_BLOWFISH PHP support!");
-
-		if ($iteration_count_log2 < 4 || $iteration_count_log2 > 31)
-			$iteration_count_log2 = 8;
-		$this->iteration_count_log2 = $iteration_count_log2;
 
 		$this->random_state = microtime();
 		if (function_exists('getmypid'))
@@ -48,7 +43,7 @@ class BCryptHasher {
 		return $output;
 	}
 
-	function gensalt_blowfish($input)
+	function gensalt_blowfish($input, $work_factor)
 	{
 		# This one needs to use a different order of characters and a
 		# different encoding scheme from the one in encode64() in phpass.
@@ -61,8 +56,8 @@ class BCryptHasher {
 		$itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 		$output = '$2a$';
-		$output .= chr(ord('0') + $this->iteration_count_log2 / 10);
-		$output .= chr(ord('0') + $this->iteration_count_log2 % 10);
+		$output .= chr(ord('0') + $work_factor / 10);
+		$output .= chr(ord('0') + $work_factor % 10);
 		$output .= '$';
 
 		$i = 0;
@@ -89,10 +84,13 @@ class BCryptHasher {
 		return $output;
 	}
 
-	function HashPassword($password)
+	function HashPassword($password, $work_factor=8)
 	{
+		if ($work_factor < 4 || $work_factor > 31) $work_factor = 8;
+
 		$random = $this->get_random_bytes(16);
-		$hash = crypt($password, $this->gensalt_blowfish($random));
+		$salt = $this->gensalt_blowfish($random, $work_factor);
+		$hash = crypt($password, $salt);
 		if (strlen($hash) == 60) return $hash;
 		return '*';
 	}

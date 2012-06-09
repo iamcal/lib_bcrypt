@@ -18,12 +18,12 @@
 	# Times are *per hash*. Beyond 14 it gets a bit crazy.
 	#
 
+	$t_hasher = new BCryptHasher();
+
 	foreach (array(4, 8, 12) as $work_factor){
 
-		$t_hasher = new BCryptHasher($work_factor);
-
 		$correct = 'test12345';
-		$hash = $t_hasher->HashPassword($correct);
+		$hash = $t_hasher->HashPassword($correct, $work_factor);
 
 		diag('Hash: ' . $hash);
 
@@ -38,9 +38,19 @@
 		$check = $t_hasher->CheckPassword($wrong, $hash);
 		$t2 = microtime_ms() - $t1;
 		ok(!$check, "incorrect hash (wf=$work_factor, $t2 ms)");
-
-		unset($t_hasher);
 	}
+
+
+	#
+	# check against a known hash.
+	# taken from https://github.com/codahale/bcrypt-ruby/blob/master/spec/bcrypt/engine_spec.rb
+	#
+
+	$hash = '$2a$05$abcdefghijklmnopqrstuu5s2v8.iXieOjg/.AySBTTZIIVFJeBui';
+	$pass = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+	ok($t_hasher->CheckPassword($pass, $hash), "check known hash");
+
 
 
 	function microtime_ms(){
