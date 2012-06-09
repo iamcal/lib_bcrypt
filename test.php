@@ -1,5 +1,5 @@
 <?php
-	require 'PasswordHash.php';
+	require 'lib_bcrypt.php';
 	require 'testmore.php';
 
 	header('Content-type: text/plain');
@@ -20,7 +20,7 @@
 
 	foreach (array(4, 8, 12) as $work_function){
 
-		$t_hasher = new PasswordHash($work_function);
+		$t_hasher = new BCryptHasher($work_function);
 
 		$correct = 'test12345';
 		$hash = $t_hasher->HashPassword($correct);

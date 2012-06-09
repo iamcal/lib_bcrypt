@@ -8,11 +8,11 @@
 #
 # There's absolutely no warranty.
 #
-class PasswordHash {
+class BCryptHasher {
 	var $iteration_count_log2;
 	var $random_state;
 
-	function PasswordHash($iteration_count_log2)
+	function BCryptHasher($iteration_count_log2)
 	{
 		if (CRYPT_BLOWFISH != 1) die("lib_bcyrpt requires CRYPT_BLOWFISH PHP support!");
 
