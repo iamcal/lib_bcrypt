@@ -5,7 +5,7 @@
 	header('Content-type: text/plain');
 
 	#
-	# Try some different work functions.
+	# Try some different work factor.
 	#
 	# On my Intel Core i7 1.8GHz windows laptop:
 	#	wf=4	~2 ms
@@ -18,9 +18,9 @@
 	# Times are *per hash*. Beyond 14 it gets a bit crazy.
 	#
 
-	foreach (array(4, 8, 12) as $work_function){
+	foreach (array(4, 8, 12) as $work_factor){
 
-		$t_hasher = new BCryptHasher($work_function);
+		$t_hasher = new BCryptHasher($work_factor);
 
 		$correct = 'test12345';
 		$hash = $t_hasher->HashPassword($correct);
@@ -30,14 +30,14 @@
 		$t1 = microtime_ms();
 		$check = $t_hasher->CheckPassword($correct, $hash);
 		$t2 = microtime_ms() - $t1;
-		ok($check, "correct hash (wf=$work_function, $t2 ms)");
+		ok($check, "correct hash (wf=$work_factor, $t2 ms)");
 
 
 		$wrong = 'test12346';
 		$t1 = microtime_ms();
 		$check = $t_hasher->CheckPassword($wrong, $hash);
 		$t2 = microtime_ms() - $t1;
-		ok(!$check, "incorrect hash (wf=$work_function, $t2 ms)");
+		ok(!$check, "incorrect hash (wf=$work_factor, $t2 ms)");
 
 		unset($t_hasher);
 	}
