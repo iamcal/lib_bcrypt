@@ -9,7 +9,7 @@
 # There's absolutely no warranty.
 #
 class BCryptHasher {
-	var $random_state;
+	private $random_state;
 
 	function BCryptHasher()
 	{
