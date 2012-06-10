@@ -4,6 +4,8 @@
 
 	header('Content-type: text/plain');
 
+	plan(7);
+
 	#
 	# Try some different work factor.
 	#

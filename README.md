@@ -93,3 +93,10 @@ If you want to get fancy, you could detect the work factor used to generate
 the hash you've already got stored and re-hash the password if it's too low.
 Using this technique, you can keep increasing your work factor as servers
 become more powerful.
+
+
+## Testing
+
+If you have perl's Test::Harness installed (you almost certainly do), you can run the tests using:
+
+prove --exec 'php' test.php
