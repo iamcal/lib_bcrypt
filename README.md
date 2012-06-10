@@ -99,4 +99,4 @@ become more powerful.
 
 If you have perl's Test::Harness installed (you almost certainly do), you can run the tests using:
 
-prove --exec 'php' test.php
+    prove --exec 'php' test.php
