@@ -9,41 +9,55 @@
 # There's absolutely no warranty.
 #
 class BCryptHasher {
-	var $random_state;
+    
+        /**
+         * Random state
+         * @var string 
+         */
+	private $random_state;
 
 	function BCryptHasher()
 	{
-		if (CRYPT_BLOWFISH != 1) die("lib_bcyrpt requires CRYPT_BLOWFISH PHP support!");
+		if (CRYPT_BLOWFISH != 1) throw new Exception("lib_bcrypt requires CRYPT_BLOWFISH PHP support!");
 
-		$this->random_state = microtime();
-		if (function_exists('getmypid'))
-			$this->random_state .= getmypid();
+		$this->random_state = gettimeofday(true);
+		$this->random_state .= uniqid('', true);
 	}
-
-	function get_random_bytes($count)
-	{
-		$output = '';
-		if (is_readable('/dev/urandom') &&
-		    ($fh = @fopen('/dev/urandom', 'rb'))) {
-			$output = fread($fh, $count);
-			fclose($fh);
-		}
+        
+        /**
+         * Generate random bytes
+         * @param int $count Number of bytes
+         * @return type 
+         */
+	private function get_random_bytes($count)
+	{       
+                /*
+                 * The function openssl_random_pseudo_bytes() is used
+                 * instead of reading from /dev/urandom for the sake of portability
+                 */
+		$output = openssl_random_pseudo_bytes($count);
 
 		if (strlen($output) < $count) {
 			$output = '';
 			for ($i = 0; $i < $count; $i += 16) {
 				$this->random_state =
-				    md5(microtime() . $this->random_state);
+				    sha1(gettimeofday(true) . $this->random_state);
 				$output .=
-				    pack('H*', md5($this->random_state));
+				    pack('H*', sha1($this->random_state));
 			}
 			$output = substr($output, 0, $count);
 		}
 
 		return $output;
 	}
-
-	function gensalt_blowfish($input, $work_factor)
+        
+        /**
+         * Generate hash salt
+         * @param string $input Salt input
+         * @param int $work_factor Work factor
+         * @return string 
+         */
+	private function gensalt_blowfish($input, $work_factor)
 	{
 		# This one needs to use a different order of characters and a
 		# different encoding scheme from the one in encode64() in phpass.
@@ -83,19 +97,31 @@ class BCryptHasher {
 
 		return $output;
 	}
-
-	function HashPassword($password, $work_factor=8)
+        
+        /**
+         * Hash plaintext
+         * @param string $password Text to be hashed
+         * @param int $work_factor Work factor
+         * @return mixed 
+         */
+	public function HashPassword($password, $work_factor=8)
 	{
 		if ($work_factor < 4 || $work_factor > 31) $work_factor = 8;
 
-		$random = $this->get_random_bytes(16);
+		$random = $this->get_random_bytes(32);
 		$salt = $this->gensalt_blowfish($random, $work_factor);
 		$hash = crypt($password, $salt);
 		if (strlen($hash) == 60) return $hash;
-		return '*';
+		return false;
 	}
 
-	function CheckPassword($password, $stored_hash)
+        /**
+         * Check a password against a stored hash
+         * @param string $password Plain text password
+         * @param string $stored_hash Stored hash
+         * @return boolean 
+         */
+	public function CheckPassword($password, $stored_hash)
 	{
 		$hash = crypt($password, $stored_hash);
 		return $hash == $stored_hash;
