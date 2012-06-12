@@ -31,7 +31,7 @@ class BCryptHasher {
 		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN'){
 		        if (function_exists('openssl_random_pseudo_bytes')){
 				$output = openssl_random_pseudo_bytes($count);
-				if (count($output) == $count) return $output;
+				if (strlen($output) == $count) return $output;
 			}
 		}
 
@@ -43,7 +43,7 @@ class BCryptHasher {
 		if (is_readable('/dev/urandom') && ($fh = @fopen('/dev/urandom', 'rb'))){
 			$output = fread($fh, $count);
 			fclose($fh);
-			if (count($output) == $count) return $output;
+			if (strlen($output) == $count) return $output;
 		}
 
 
