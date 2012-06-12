@@ -13,38 +13,55 @@ class BCryptHasher {
 
 	function BCryptHasher()
 	{
-		if (CRYPT_BLOWFISH != 1) die("lib_bcyrpt requires CRYPT_BLOWFISH PHP support!");
+		if (CRYPT_BLOWFISH != 1) die("lib_bcrypt requires CRYPT_BLOWFISH PHP support!");
 
 		$this->random_state = microtime();
-		if (function_exists('getmypid'))
-			$this->random_state .= getmypid();
+		$this->random_state .= uniqid('', true);
+		if (function_exists('getmypid')) $this->random_state .= getmypid();
 	}
 
-	function get_random_bytes($count)
+	private function get_random_bytes($count)
 	{
-		$output = '';
-		if (is_readable('/dev/urandom') &&
-		    ($fh = @fopen('/dev/urandom', 'rb'))) {
+		#
+		# best option is openssl_random_pseudo_bytes(), if available.
+		# avoid this in windows, since it can be *very* slow (30s+)
+		# http://us.php.net/openssl_random_pseudo_bytes
+		#
+
+		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN'){
+		        if (function_exists('openssl_random_pseudo_bytes')){
+				$output = openssl_random_pseudo_bytes($count);
+				if (count($output) == $count) return $output;
+			}
+		}
+
+
+		#
+		# if we're on a unix-like, try reading from /dev/urandom
+		#
+
+		if (is_readable('/dev/urandom') && ($fh = @fopen('/dev/urandom', 'rb'))){
 			$output = fread($fh, $count);
 			fclose($fh);
+			if (count($output) == $count) return $output;
 		}
 
-		if (strlen($output) < $count) {
-			$output = '';
-			for ($i = 0; $i < $count; $i += 16) {
-				$this->random_state =
-				    md5(microtime() . $this->random_state);
-				$output .=
-				    pack('H*', md5($this->random_state));
-			}
-			$output = substr($output, 0, $count);
-		}
 
-		return $output;
+		#
+		# fallback to using our random_state
+		#
+
+		$output = '';
+		for ($i = 0; $i < $count; $i += 16){
+			$this->random_state = md5(microtime() . $this->random_state);
+			$output .= pack('H*', md5($this->random_state));
+		}
+		return substr($output, 0, $count);
 	}
 
-	function gensalt_blowfish($input, $work_factor)
+	private function gensalt_blowfish($input, $work_factor)
 	{
+		#
 		# This one needs to use a different order of characters and a
 		# different encoding scheme from the one in encode64() in phpass.
 		# We care because the last character in our encoded string will
@@ -53,6 +70,8 @@ class BCryptHasher {
 		# has the 4 unused bits set to non-zero, we do not want to take
 		# chances and we also do not want to waste an additional byte
 		# of entropy.
+		#
+
 		$itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 		$output = '$2a$';
