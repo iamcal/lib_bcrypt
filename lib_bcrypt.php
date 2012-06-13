@@ -24,11 +24,11 @@ class BCryptHasher {
 	{
 		#
 		# best option is openssl_random_pseudo_bytes(), if available.
-		# avoid this in windows, since it can be *very* slow (30s+)
-		# http://us.php.net/openssl_random_pseudo_bytes
+		# avoid this under windows, unless we have version 5.3.4+
+		# http://stackoverflow.com/questions/1940168/openssl-random-pseudo-bytes-is-slow-php
 		#
 
-		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN'){
+		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN' || version_compare(PHP_VERSION, '5.3.4') >= 0){
 		        if (function_exists('openssl_random_pseudo_bytes')){
 				$output = openssl_random_pseudo_bytes($count);
 				if (strlen($output) == $count) return $output;
