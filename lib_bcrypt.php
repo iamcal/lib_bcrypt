@@ -111,7 +111,7 @@ class BCryptHasher {
 		$salt = $this->gensalt_blowfish($random, $work_factor);
 		$hash = crypt($password, $salt);
 		if (strlen($hash) == 60) return $hash;
-		return '*';
+		return false;
 	}
 
 	function CheckPassword($password, $stored_hash)
