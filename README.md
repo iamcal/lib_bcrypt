@@ -100,3 +100,8 @@ become more powerful.
 If you have perl's Test::Harness installed (you almost certainly do), you can run the tests using:
 
     prove --exec 'php' test.php
+    
+
+## Notes
+
+Bcrypt will only use the first 72 bytes of the password as part of the hash. If you supply a longer string, only the first 72 bytes will be hashed.
